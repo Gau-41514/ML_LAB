@@ -1,0 +1,73 @@
+import pandas as pd
+import numpy as np
+
+data = {
+    "rid":[1,2,3,4,5,6,7,8,9,10,11,12,13,14],
+    "age":["Y","Y","M","S","S","S","M","Y","Y","S","Y","M","M","S"],
+    "Income":["H","H","H","Me","L","L","L","Me","L","Me","Me","Me","H","Me"],
+    "Student":["no","no","no","no","Yes","Yes","Yes","no","Yes","Yes","Yes","no","Yes","no"],
+    "Credit_saving":["fair","excell","fair","fair","fair","excell","excell","fair","fair","fair","excell","excell","fair","excell"],
+    "Class":["no","no","Yes","Yes","Yes","no","Yes","no","Yes","Yes","Yes","Yes","Yes","no"]
+}
+
+df = pd.DataFrame(data)
+print("DataFrame")
+print(df)
+
+df = pd.DataFrame(data).drop(columns=["rid"])
+
+from sklearn.model_selection import train_test_split
+
+X = df.drop("Class", axis=1)
+y = df["Class"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+Class_Yes = df[df["Class"] == "Yes"]
+
+Age_Y_Yes = (Class_Yes["age"] == "Y")
+Prob_A = Age_Y_Yes.sum() / len(Class_Yes)
+print(Prob_A)
+
+Student_Yes_Yes = (Class_Yes["Student"] == "Yes")
+Prob_B = Student_Yes_Yes.sum() / len(Class_Yes)
+print(Prob_B)
+
+Credit_Savings_yes_fair = (Class_Yes["Credit_saving"] == "fair")
+Prob_C = Credit_Savings_yes_fair.sum() / len(Class_Yes)
+print(Prob_C)
+
+Income_Yes_Low = (Class_Yes["Income"] == "L")
+Prob_D = Income_Yes_Low.sum() / len(Class_Yes)
+print(Prob_D)
+
+Prob_Total = Prob_A * Prob_B * Prob_C * Prob_D
+print(Prob_Total)
+
+from sklearn.preprocessing import OrdinalEncoder
+from sklearn.naive_bayes import CategoricalNB
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
+encoder = OrdinalEncoder()
+
+X_train = encoder.fit_transform(X_train)
+X_test = encoder.transform(X_test)
+
+model = CategoricalNB()
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+print("Accuracy:", accuracy)
+
+precision = precision_score(y_test, y_pred, pos_label="Yes")
+print("Precision:", precision)
+
+recall = recall_score(y_test, y_pred, pos_label="Yes")
+print("Recall:", recall)
+
+f1 = f1_score(y_test, y_pred, pos_label="Yes")
+print("F1-Score:", f1)
